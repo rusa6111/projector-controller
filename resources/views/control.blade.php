@@ -26,6 +26,10 @@
     display: flex;
     align-items: center;
   }
+  .set-container {
+    display: flex;
+    align-items: center;
+  }
   .footer-title {
     margin-bottom: 0;
     margin-right: 30px;
@@ -34,6 +38,12 @@
     width: 100px;
     margin-right: 40px;
   }
+  h3 {
+    margin-top: 15px;
+  }
+  h2 {
+    margin-top: 30px;
+  }
 </style>
 @endsection
 @section('content')
@@ -41,19 +51,45 @@
   <li>{{$error}}</li>
 @endforeach
 <h1>Controller</h1>
+
+<h2>Sets</h2>
+
+@foreach ($sets as $set)
+<div>
+  <h3>{{ $set->id }}</h3>
+  <form method="post" class="set-container">
+    @csrf
+    <input type="hidden" name="id" value="{{ $set->id }}">
+    <div class="input-group">
+      <span class="input-group-text"><span class="d-none d-xl-inline">Player </span>A</span>
+      <input type="text" name="titleA" class="form-control" value="{{ $set->name_a }}">
+    </div>
+    <div class="input-group">
+      <span class="input-group-text"><span class="d-none d-xl-inline">Player </span>B</span>
+      <input type="text" name="titleB" class="form-control" value="{{ $set->name_b }}">
+    </div>
+    <div class="input-group">
+      <span class="input-group-text"><span class="d-none d-xl-inline">Player </span>C</span>
+      <input type="text" name="titleC" class="form-control" value="{{ $set->name_c }}">
+    </div>
+    <button class="btn btn-danger" formaction="{{ route('deleteSets') }}" style="margin-right: 20px;">Remove</button>
+    <button type="button" id="set-{{ $set->id }}" class="btn btn-success">Set</button>
+  </form>
+</div>
+@endforeach
+
+<h2>Movies</h2>
+
 @foreach ($movies as $movie)
 <div>
-  <h2>{{ $movie->title }}</h2>
+  <h3>{{ $movie->title }}</h3>
   <div>
     <input id="title" name="title" type="hidden" value="{{ $movie->title }}">
     <button type="submit" class="btn btn-primary" id="button-{{ $movie->title }}-A">Player A</button>
     <button type="submit" class="btn btn-primary" id="button-{{ $movie->title }}-B">Player B</button>
     <button type="submit" class="btn btn-primary" id="button-{{ $movie->title }}-C">Player C</button>
-    <button type="button" id="preview-{{ $movie->title }}" class="btn btn-secondary">Preview</button>
+    <a href="{{ asset('storage/' . $movie->path) }}"><button type="button" class="btn btn-secondary">Preview</button></a>
   </div>
-  <video preload="auto" id="video-{{ $movie->title }}" controls width="750" class="invisible">
-    <source src="{{ asset('storage/' . $movie->path) }}" type="video/mp4">
-  </video>
 </div>
 @endforeach
 <div class="footer-blank"></div>
@@ -61,7 +97,7 @@
   <div class="container">
     <div class="row">
       <div class="sm-col-12 md-col-12">
-        <form action="{{ route('play') }}" method="post" class="footer-container">
+        <form method="post" class="footer-container">
           @csrf
           <div class="input-group">
             <span class="input-group-text"><span class="d-none d-xl-inline">Player </span>A</span>
@@ -75,7 +111,8 @@
             <span class="input-group-text"><span class="d-none d-xl-inline">Player </span>C</span>
             <input type="text" id="titleC" name="titleC" class="form-control">
           </div>
-          <button type="submit" class="btn btn-success">Play</button>
+          <button type="submit" class="btn btn-primary" style="margin-right: 20px;" formaction="{{ route('register') }}">Register</button>
+          <button type="submit" class="btn btn-success" formaction="{{ route('play') }}">Play</button>
         </form>
       </div>
     </div>
@@ -99,16 +136,17 @@
     document.getElementById("button-{{ $movie->title }}-C").onclick = function () {
       titleC.value = "{{ $movie->title }}";
     }
-    
-    document.getElementById("preview-{{ $movie->title }}").onclick = function () {
-      var video = document.getElementById("video-{{ $movie->title }}");
-      if (video.classList.contains('invisible')) {
-        video.classList.remove('invisible');
-      } else {
-        video.classList.add('invisible');
-      }
-    }
   @endforeach
+  
+  @foreach ($sets as $set)
+    document.getElementById("set-{{ $set->id }}").onclick = function () {
+      titleA.value = "{{ $set->name_a }}";
+      titleB.value = "{{ $set->name_b }}";
+      titleC.value = "{{ $set->name_c }}";
+    }
+  
+  @endforeach
+  
 </script>
 
 @endsection

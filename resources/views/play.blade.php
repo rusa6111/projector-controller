@@ -54,7 +54,8 @@
       var request = new XMLHttpRequest();
       request.responseType = "json";
       var done = {};
-      var player_id = ""
+      var player_id = "";
+      var interval_id = null;
       function enquiry() {
         request.open("GET", "{{ route('enquiry') }}");
         request.send(null);
@@ -65,20 +66,51 @@
             if (i.player_id != player_id) continue
             if (done[i.id]) continue;
             done[i.id] = true
+            
+            @foreach($movies as $movie)
+            document.getElementById("video-{{ $movie->title }}").classList.add("invisible");
+            @endforeach
+            var play = document.getElementById("video-" + i.name);
+            play.classList.remove("invisible");
             console.log(i.id, i.name)
-            window.setTimeout(function () {done[i.id] = false;}, 3000);
+            
+            window.clearInterval(interval_id);
+            
+            window.setTimeout(function () {
+              done[i.id] = false;
+            }, 3000);
             window.setTimeout(function (a) {
               return function() {
-                @foreach($movies as $movie)
-                document.getElementById("video-{{ $movie->title }}").classList.add("invisible");
-                @endforeach
-                var play = document.getElementById("video-" + a.name);
-                play.classList.remove("invisible");
                 play.currentTime = 0;
-                console.log(a.id, a.name)
+                console.log(a.id, a.name);
                 play.play();
               }
             } (i), i.play_time - responseObj.now);
+            
+            window.setTimeout(function (a) {
+              return function () {
+                interval_id = window.setInterval(function (b) {
+                  nw = Date.now() - 1000 * play.currentTime;
+                  return function() {
+                    if (Date.now() - nw > 0 && Date.now() - nw - 1000 * play.currentTime > 50) {
+                      play.playbackRate = 2;
+                      console.log(Date.now() - nw, play.currentTime, Math.abs(Date.now() - nw - 1000 * play.currentTime));
+                    } else if (Date.now() - nw > 0 && Date.now() - nw - 1000 * play.currentTime < -50) {
+                      play.playbackRate = 0.5;
+                      console.log(Date.now() - nw, play.currentTime, Math.abs(Date.now() - nw - 1000 * play.currentTime));
+                    } else {
+                      play.playbackRate = 1;
+                    }
+                  }
+                } (a), 50);
+              }
+            } (i), i.play_time - responseObj.now + 500);
+            
+            
+            
+            play.addEventListener('ended', (event) => {
+              window.clearInterval(interval_id);
+            });
           }
         }
       }
@@ -95,6 +127,7 @@
         btnC.classList.remove('active');
         this.classList.add('active');
         player_id = this.id[3];
+        console.log(player_id);
       }
       btnA.onclick = btnOnklick;
       btnB.onclick = btnOnklick;

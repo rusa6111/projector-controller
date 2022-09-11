@@ -29,4 +29,6 @@ Route::get('control/add', 'MainController@add')->name('add');
 Route::post('control/add', 'MainController@add_post')->name('add_post');
 Route::post('control/delete', 'MainController@delete')->name('delete');
 Route::post('control/play', 'MainController@play')->name('play');
+Route::post('control/register', 'MainController@register')->name('register');
+Route::post('control/register/delete', 'MainController@deleteSets')->name('deleteSets');
 
